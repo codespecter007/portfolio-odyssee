@@ -48,6 +48,28 @@ CREATE TABLE IF NOT EXISTS experiences (
   "createdAt" timestamptz NOT NULL DEFAULT now(),
   "updatedAt" timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS evenements (
+  id bigserial PRIMARY KEY,
+  cree timestamptz NOT NULL DEFAULT now(),
+  type varchar(20) NOT NULL,
+  chemin varchar(200),
+  source varchar(100),
+  ref varchar(40),
+  pays varchar(2),
+  appareil varchar(12),
+  session varchar(32) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS evenements_cree_idx ON evenements (cree);
+CREATE TABLE IF NOT EXISTS messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  cree timestamptz NOT NULL DEFAULT now(),
+  nom varchar(120) NOT NULL,
+  email varchar(200) NOT NULL,
+  entreprise varchar(120),
+  message text NOT NULL,
+  ref varchar(40),
+  lu boolean NOT NULL DEFAULT false
+);
 CREATE INDEX IF NOT EXISTS projets_ordre_idx ON projets (ordre);
 CREATE INDEX IF NOT EXISTS experiences_ordre_idx ON experiences (ordre);
 `;

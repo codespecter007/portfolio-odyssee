@@ -25,6 +25,8 @@ export default function LayoutAdmin({ children }: Readonly<{ children: React.Rea
         </Link>
         <nav aria-label="Administration" className="admin__nav">
           <Link href="/admin/">Contenu</Link>
+          <Link href="/admin/statistiques/">Statistiques</Link>
+          <Link href="/admin/messages/">Messages</Link>
           <a href="/" target="_blank" rel="noopener">
             Voir le site ↗
           </a>

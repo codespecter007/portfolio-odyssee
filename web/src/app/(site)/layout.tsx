@@ -1,8 +1,10 @@
 import { EnTete } from "@/components/EnTete";
+import { Mesure } from "@/components/Mesure";
+import { baseActive } from "@/lib/serveur/db";
 import { Mouvements } from "@/components/Mouvement";
 import { PiedDePage } from "@/components/PiedDePage";
 
-// Rendu à chaque visite : les données viennent de l’API (avec un cache de 5 minutes,
+// Rendu à chaque visite : les données viennent de la base (avec un cache de 5 minutes,
 // vidé dès qu’une modification est faite dans l’admin).
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,8 @@ export default function LayoutSite({ children }: Readonly<{ children: React.Reac
   return (
     <>
       {umami && idSite && <script defer src={umami} data-website-id={idSite} />}
+      {/* Statistiques maison (sans cookie), visibles dans l’admin. */}
+      {baseActive && <Mesure />}
       <a href="#contenu" className="lien-evitement">
         Aller au contenu
       </a>

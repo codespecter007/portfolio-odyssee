@@ -67,6 +67,16 @@ Sans `API_INTERNAL_URL`, le site fonctionne seul avec le contenu de `web/src/con
 - Un seul compte, défini par `ADMIN_EMAIL` et `ADMIN_PASSWORD_HASH` ; session dans un cookie httpOnly,
   5 tentatives de connexion par minute au maximum.
 
+### Statistiques et messages
+
+- `/admin/statistiques` : visites, pages vues, CV téléchargés, clics e-mail, LinkedIn et GitHub,
+  sources, pays, appareils et parcours anonyme des dernières visites.
+- **Liens de candidature** : `odysseekom.fr/?ref=entreprise` dans une lettre de motivation montre
+  quand l’entreprise visite le site et ce qu’elle consulte. `?ref=qr` pour le QR code du CV.
+- `/admin/messages` : messages envoyés depuis le formulaire de la page Contact.
+- Mesure sans cookie : identifiant aléatoire par onglet, aucune adresse IP conservée, robots ignorés,
+  visites de l’admin non comptées, données effacées après 13 mois.
+
 ## Mise en production
 
 **Hébergement actuel : Vercel (gratuit).** Le site du dossier `web/` est publié à chaque push sur

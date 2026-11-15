@@ -17,7 +17,7 @@ export function CopierEmail({ email }: { email: string }) {
   };
 
   return (
-    <button type="button" className="copier" onClick={copier}>
+    <button type="button" className="copier" onClick={copier} data-stat="email-copie">
       {copie ? <Coche /> : <Copier />}
       <span aria-live="polite">{copie ? "Copié" : "Copier"}</span>
     </button>

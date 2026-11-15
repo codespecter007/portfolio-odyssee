@@ -3,7 +3,9 @@ import { FlecheDiag, Telecharger } from "@/components/icones";
 import { Apparition, TexteParMots } from "@/components/Mouvement";
 import { QrCode } from "@/components/visuels";
 import { profil, lienOuAncre } from "@/content/profil";
+import { baseActive } from "@/lib/serveur/db";
 import { CopierEmail } from "./CopierEmail";
+import { FormulaireContact } from "./FormulaireContact";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -25,6 +27,14 @@ export default function Contact() {
           Pour un stage, une question sur un projet ou un échange. Je réponds à chaque message.
         </p>
       </section>
+
+      {baseActive && (
+        <section className="contact-message" aria-label="Formulaire de contact">
+          <Apparition>
+            <FormulaireContact />
+          </Apparition>
+        </section>
+      )}
 
       <section className="blocs-contact" aria-label="Liens">
         <Apparition>
