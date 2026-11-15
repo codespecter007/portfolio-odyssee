@@ -59,7 +59,7 @@ export function FormulaireContact() {
         </label>
         <label className="formulaire-contact__large">
           <span>Message</span>
-          <textarea name="message" required maxLength={4000} rows={5} />
+          <textarea name="message" required maxLength={4000} rows={4} />
         </label>
         {/* Champ piège pour les robots, invisible pour les personnes. */}
         <label className="formulaire-contact__piege" aria-hidden="true">
