@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import "./admin.css";
 import { BoutonDeconnexion } from "@/components/admin/BoutonDeconnexion";
 import { BasculeTheme } from "@/components/BasculeTheme";
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default function LayoutAdmin({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Sans API configurée (hébergement simple comme Vercel), l’espace admin n’existe pas.
+  if (!process.env.API_INTERNAL_URL) notFound();
   return (
     <div className="admin">
       <header className="admin__barre">

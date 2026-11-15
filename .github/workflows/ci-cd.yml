@@ -1,4 +1,6 @@
 # Pipeline push → tests → publication.
+# Hébergement actuel : Vercel, qui publie le site après chaque push sur main.
+# Ce pipeline vérifie le code à chaque push (tests du site et de l’API).
 #   1. Tests : site (lint, format, build, Playwright) et API (types, tests unitaires et de bout en bout).
 #   2. Images Docker multi-architecture (amd64, et arm64 pour Oracle Ampere), publiées sur GHCR.
 #   3. Test de fumée : la pile démarre réellement et répond.
@@ -62,10 +64,12 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  # Les étapes suivantes servent à l’auto-hébergement (Docker sur un serveur).
+  # Elles ne tournent que si la variable DEPLOIEMENT_DOCKER vaut « oui » dans le dépôt.
   images:
     name: Images Docker (${{ matrix.app }})
     needs: [test-web, test-api]
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && vars.DEPLOIEMENT_DOCKER == 'oui'
     runs-on: ubuntu-latest
     permissions: { contents: read, packages: write }
     strategy:
@@ -94,6 +98,7 @@ jobs:
   fumee:
     name: Test de fumée de la pile
     needs: images
+    if: vars.DEPLOIEMENT_DOCKER == 'oui'
     runs-on: ubuntu-latest
     permissions: { contents: read, packages: read }
     steps:
@@ -137,7 +142,7 @@ jobs:
     name: Déploiement sur le serveur
     needs: fumee
     # S’active dès que la variable DOMAINE est définie dans le dépôt (Settings → Variables).
-    if: github.ref == 'refs/heads/main' && vars.DOMAINE != ''
+    if: github.ref == 'refs/heads/main' && vars.DEPLOIEMENT_DOCKER == 'oui' && vars.DOMAINE != ''
     runs-on: ubuntu-latest
     environment:
       name: production

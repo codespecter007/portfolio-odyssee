@@ -68,4 +68,12 @@ Sans `API_INTERNAL_URL`, le site fonctionne seul avec le contenu de `web/src/con
 
 ## Mise en production
 
-Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : serveur Azure, nom de domaine, secrets GitHub.
+**Hébergement actuel : Vercel (gratuit).** Le site du dossier `web/` est publié à chaque push sur
+`main`, avec HTTPS et un nom de domaine. Sans API configurée, il utilise le contenu de
+`web/src/content/` et l’espace `/admin` est désactivé.
+
+Réglages du projet Vercel : *Root Directory* `web`, framework Next.js, aucune variable à définir.
+
+**Plus tard : auto-hébergement complet** (API, admin, Grafana) avec Docker sur un serveur :
+voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md), puis définir la variable de dépôt
+`DEPLOIEMENT_DOCKER=oui` pour activer les étapes Docker du pipeline.
