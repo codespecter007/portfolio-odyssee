@@ -11,8 +11,11 @@ GitHub Student Developer Pack, puis le branchement du pipeline. Compter environ 
    - Groupe de ressources : nouveau, `portfolio`
    - Nom : `portfolio`, région : **France Central**
    - Image : **Ubuntu Server 24.04 LTS, x64**
-   - Taille : **B2s** (2 vCPU, 4 Go), confortable pour toute la pile ;
-     **B1ms** (1 vCPU, 2 Go) si tu veux faire durer le crédit, avec la mémoire d’échange ci-dessous
+   - Taille : **B1s** (1 vCPU, 1 Go). Elle fait partie des services gratuits 12 mois de l’offre
+     étudiante (750 heures par mois, soit une machine allumée en permanence). Vérifie la mention
+     « éligible aux services gratuits » à côté de la taille. La pile est réglée pour tenir dans 1 Go
+     avec la mémoire d’échange ci-dessous.
+   - Disque : **SSD Premium P6 (64 Go)**, lui aussi dans les services gratuits
    - Authentification : **clé publique SSH**, utilisateur `azureuser`, source :
      *Utiliser une clé publique existante*, puis coller ta clé publique
    - Ports entrants publics : **SSH (22), HTTP (80), HTTPS (443)**

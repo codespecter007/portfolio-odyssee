@@ -12,6 +12,7 @@ x-journaux: &journaux
 
 services:
   caddy:
+    mem_limit: 64m
     image: caddy:2.10-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443", "443:443/udp"]
@@ -26,9 +27,11 @@ services:
     <<: *journaux
 
   web:
+    mem_limit: 256m
     image: ghcr.io/${GHCR_OWNER:-codespecter007}/portfolio-web:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
+      NODE_OPTIONS: --max-old-space-size=192
       API_INTERNAL_URL: http://api:4000
       REVALIDATE_SECRET: ${REVALIDATE_SECRET}
       UMAMI_SCRIPT_URL: https://stats.${DOMAINE}/script.js
@@ -38,9 +41,11 @@ services:
     <<: *journaux
 
   api:
+    mem_limit: 192m
     image: ghcr.io/${GHCR_OWNER:-codespecter007}/portfolio-api:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
+      NODE_OPTIONS: --max-old-space-size=128
       DATABASE_URL: postgresql://portfolio:${POSTGRES_PASSWORD}@db:5432/portfolio
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
@@ -54,6 +59,7 @@ services:
     <<: *journaux
 
   db:
+    mem_limit: 192m
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -71,6 +77,7 @@ services:
 
   # Statistiques de visite respectueuses de la vie privée (sans cookie).
   umami:
+    mem_limit: 256m
     image: ghcr.io/umami-software/umami:postgresql-latest
     restart: unless-stopped
     environment:
@@ -81,17 +88,19 @@ services:
     <<: *journaux
 
   prometheus:
+    mem_limit: 192m
     image: prom/prometheus:v3.5.0
     restart: unless-stopped
     command:
       - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.retention.time=15d
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     <<: *journaux
 
   grafana:
+    mem_limit: 160m
     image: grafana/grafana:12.1.0
     restart: unless-stopped
     environment:
@@ -109,6 +118,7 @@ services:
 
   # Métriques de la machine : CPU, mémoire, disque, réseau.
   node-exporter:
+    mem_limit: 32m
     image: prom/node-exporter:v1.9.1
     restart: unless-stopped
     command: ["--path.rootfs=/host"]
@@ -117,9 +127,11 @@ services:
       - /:/host:ro,rslave
     <<: *journaux
 
-  # Métriques par conteneur.
+  # Métriques par conteneur. Désactivé par défaut pour économiser la mémoire d’un petit serveur :
+  # l’activer avec COMPOSE_PROFILES=conteneurs dans .env (serveur de 2 Go ou plus).
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.52.1
+    profiles: [conteneurs]
     restart: unless-stopped
     privileged: true
     devices: ["/dev/kmsg"]
