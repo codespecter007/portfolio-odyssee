@@ -1,0 +1,50 @@
+# Caddy obtient et renouvelle seul les certificats HTTPS (Let’s Encrypt).
+{
+	email {$ACME_EMAIL}
+	servers {
+		metrics
+	}
+	admin 0.0.0.0:2019
+}
+
+(securite) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	encode zstd gzip
+}
+
+{$DOMAINE} {
+	import securite
+
+	# Route interne entre l’API et le site : jamais exposée.
+	respond /interne/* 404
+
+	handle /api/* {
+		reverse_proxy api:4000
+	}
+	handle /uploads/* {
+		reverse_proxy api:4000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+www.{$DOMAINE} {
+	redir https://{$DOMAINE}{uri} permanent
+}
+
+grafana.{$DOMAINE} {
+	import securite
+	reverse_proxy grafana:3000
+}
+
+stats.{$DOMAINE} {
+	import securite
+	reverse_proxy umami:3000
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "ordre": 1,
+    "publie": true,
+    "periode": "Juil. à sept. 2025",
+    "poste": "Développeur full-stack, stage de 3 mois",
+    "structure": "Bridg’in, Douala (Cameroun)",
+    "description": "Une entreprise de formation pour les professionnels et les particuliers. En équipe, nous avons réalisé son site, du back-end Spring Boot à l’interface, et participé à la conception et à la mise en place de son réseau d’entreprise.",
+    "technos": [
+      "Java",
+      "Spring Boot",
+      "HTML",
+      "CSS",
+      "PostgreSQL",
+      "Docker",
+      "Git",
+      "Réseau LAN"
+    ]
+  }
+]

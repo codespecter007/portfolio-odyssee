@@ -1,65 +1,71 @@
 # Portfolio d’Odyssée KOM FOADEM
 
-Site statique en Next.js et TypeScript, tiré de la maquette Figma « Portfolio Odyssée · Refonte visuelle ».
-Deux thèmes : sombre (olive) et clair (bleu ciel), avec une bascule dans la navigation.
+Portfolio auto-hébergé : un site Next.js, une API NestJS avec PostgreSQL, un espace
+d’administration pour ajouter projets et expériences, et une supervision avec Prometheus et Grafana.
+Tout tourne dans Docker, et chaque push sur `main` passe par un pipeline de tests puis de déploiement.
 
-## Lancer le site
-
-Il faut Node.js 20 ou plus récent.
-
-```bash
-npm install
-npm run dev        # http://localhost:3000
+```
+                        Internet
+                           │  HTTPS (Caddy, Let’s Encrypt)
+      ┌────────────────────┼─────────────────────┬──────────────────┐
+  domaine/              domaine/api            grafana.domaine    stats.domaine
+      │                    │                      │                  │
+  Next.js (web) ──────► NestJS (api)          Grafana            Umami
+      ▲   revalidation     │                      │                  │
+      └────────────────────┤                  Prometheus ◄── node-exporter, cAdvisor,
+                       PostgreSQL ◄───────────────┘              Caddy, API (/metrics)
 ```
 
-## Mise en ligne (CI/CD)
+## Organisation du dépôt
 
-Le site est publié sur GitHub Pages par GitHub Actions (`.github/workflows/deploy.yml`) :
-à chaque `git push` sur `main`, le pipeline installe les dépendances, lance ESLint,
-construit le site statique (`out/`) et le déploie.
-
-Adresse : https://codespecter007.github.io
-
-Pour construire à la main : `npm run build` crée le dossier `out/`.
-
-## Remplacer le contenu provisoire
-
-Tout le texte est dans `src/content/`. Chaque valeur provisoire est marquée `À REMPLACER`.
-
-| Fichier | Contenu |
+| Dossier | Contenu |
 |---|---|
-| `src/content/profil.ts` | présentation, stage recherché, photo, e-mail, liens GitHub et LinkedIn, QR code |
-| `src/content/projets.ts` | projets et études de cas (textes, mesures, liens) |
-| `src/content/parcours.ts` | chapitres du parcours, expériences, compétences |
+| `web/` | Site Next.js (pages publiques et espace `/admin`), tests Playwright |
+| `api/` | API NestJS + TypeORM : projets, expériences, connexion admin, envoi d’images, métriques |
+| `infra/` | `docker-compose.yml` de production, Caddy, Prometheus, tableaux de bord Grafana |
+| `.github/workflows/` | Pipeline CI/CD |
 
-Fichiers à déposer dans `public/` :
+## Le pipeline (push → tests → publication)
 
-- `public/cv.pdf` : ton CV ;
-- `public/photos/…` : ta photo détourée et, si tu veux, les photos souvenirs ;
-- l’image du QR code, une fois l’adresse du site connue ;
-- une vraie capture de Mellifica, à passer au composant `Tablette` (`capture="/captures/mellifica.webp"`).
+1. **Tests** : lint, formatage, build et 40 tests Playwright pour le site ; vérification des types,
+   tests unitaires et tests de bout en bout (sur un vrai PostgreSQL) pour l’API.
+2. **Images** : construction des images Docker `amd64` et `arm64`, publiées sur GitHub Container Registry.
+3. **Test de fumée** : la base, l’API et le site démarrent ensemble et doivent répondre.
+4. **Déploiement** : copie de la configuration sur le serveur par SSH, mise à jour des conteneurs,
+   puis vérification que le site en ligne répond.
 
-Une valeur `null` affiche un emplacement vide (photo, QR code) ou un lien `#` (GitHub, LinkedIn).
-Les filtres de la page Projets n’apparaissent que pour les catégories qui ont au moins un projet.
+Le déploiement ne s’active que lorsque le serveur est configuré (voir le guide).
 
-## Organisation
+## Développement local
 
-- `src/app/` : les pages (accueil, projets, étude de cas, parcours, contact) et `globals.css`
-  (couleurs des deux thèmes, typographie, composants) ;
-- `src/components/` : en-tête et bascule de thème, pied de page, boutons, cartes, schémas, animations ;
-- `public/3d/` : rendus 3D en WebP, une version par thème.
+Il faut Node.js 22 et un PostgreSQL local.
 
-## Outils
+```bash
+# API
+cd api
+cp .env.example .env              # puis remplir les valeurs
+npm install
+npm run hash-password -- "un mot de passe d’au moins 12 caractères"   # → ADMIN_PASSWORD_HASH
+npm run build && npm run seed && npm start      # http://localhost:4000
 
-- `npm run lint` : ESLint ;
-- `npm run format` : Prettier ;
-- `npm run test:visual` : Playwright prend des captures de chaque page, desktop et mobile,
-  dans les deux thèmes (dans `tests/captures/`), et vérifie la bascule et les filtres.
-  La première fois : `npx playwright install chromium`.
+# Site (dans un autre terminal)
+cd web
+npm install
+API_INTERNAL_URL=http://localhost:4000 REVALIDATE_SECRET=<même valeur que l’API> npm run dev
+```
 
-## Accessibilité et animations
+Le site est sur http://localhost:3000 et l’admin sur http://localhost:3000/admin.
+Sans `API_INTERNAL_URL`, le site fonctionne seul avec le contenu de `web/src/content/`.
 
-- thème choisi mémorisé, sinon préférence du système ;
-- contrastes vérifiés dans les deux thèmes (niveau AA au minimum) ;
-- lien d’évitement, focus visible, menu mobile fermable avec Échap ;
-- animations coupées si « réduire les animations » est activé dans le système.
+## Espace admin
+
+- `/admin` : liste des projets (ordre, brouillon ou publié) et des expériences.
+- Création et modification des projets : carte, technologies et logos, visuel (capture envoyée ou
+  schéma en arborescence), étude de cas complète, liens.
+- Les modifications apparaissent tout de suite sur le site : l’API prévient Next.js, qui vide son cache.
+- Un seul compte, défini par `ADMIN_EMAIL` et `ADMIN_PASSWORD_HASH` ; session dans un cookie httpOnly,
+  5 tentatives de connexion par minute au maximum.
+
+## Mise en production
+
+Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : serveur Oracle Cloud, nom de domaine, secrets GitHub.

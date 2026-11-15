@@ -1,0 +1,260 @@
+/* ---------- Espace admin : sobre, lisible, dans les couleurs du site ---------- */
+.admin {
+  min-height: 100vh;
+  background: var(--fond);
+}
+.admin__barre {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  background: var(--contraste);
+  color: var(--sur-contraste);
+}
+.admin__titre {
+  font: 800 1.125rem/1 var(--f-titre);
+  text-decoration: none;
+}
+.admin__nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-weight: 600;
+}
+.admin__nav a {
+  text-decoration: none;
+}
+.admin__contenu {
+  width: min(100% - 32px, 960px);
+  margin: 32px auto 80px;
+}
+.admin-chargement {
+  padding: 48px;
+  text-align: center;
+  color: var(--texte-2);
+}
+.admin-carte {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 3vw, 36px);
+  border-radius: 24px;
+  background: var(--carte);
+  box-shadow: var(--argile-pose);
+}
+.admin-carte__entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-tableau {
+  display: grid;
+  gap: 28px;
+}
+.admin-connexion {
+  max-width: 420px;
+  margin: 10vh auto 0;
+}
+.admin-bouton {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bouton-fond);
+  color: var(--bouton-texte);
+  font: 600 0.9375rem/1 var(--f-texte);
+  text-decoration: none;
+  cursor: pointer;
+}
+.admin-bouton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.admin-bouton--leger {
+  background: transparent;
+  color: inherit;
+  border: 1.5px solid currentColor;
+  min-height: 36px;
+  padding: 6px 14px;
+}
+.admin-erreur,
+.admin-info {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.admin-erreur {
+  background: #f8d7d3;
+  color: #7a1c12;
+}
+.admin-info {
+  background: var(--bloc);
+}
+.admin-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--sur-accent);
+  font: 600 0.75rem/1.4 var(--f-texte);
+}
+.admin-liste {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-liste li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--trait);
+  border-radius: 14px;
+}
+.admin-liste__ordre {
+  width: 28px;
+  font: 800 1.1rem/1 var(--f-titre);
+  color: var(--decor);
+}
+.admin-liste__nom {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+.admin-liste__nom small {
+  color: var(--texte-2);
+}
+.admin-liste__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.admin-liste__actions button,
+.ligne__actions button {
+  padding: 6px 10px;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.admin-liste__actions button:disabled,
+.ligne__actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.admin-formulaire h2 {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--trait);
+}
+.admin-formulaire__fin {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.champ {
+  display: grid;
+  gap: 6px;
+}
+.champ label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.champ small {
+  color: var(--texte-2);
+}
+.champ input,
+.champ textarea,
+.champ select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--trait);
+  border-radius: 10px;
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+}
+.champ input:focus,
+.champ textarea:focus,
+.champ select:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+.grille-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+}
+.lignes {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  border: 1.5px dashed var(--trait);
+  border-radius: 14px;
+}
+.lignes legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.ligne {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--trait);
+}
+.ligne__champs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.ligne__actions {
+  display: flex;
+  gap: 6px;
+}
+.cases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+.case {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.image {
+  display: grid;
+  gap: 8px;
+}
+.image img {
+  max-width: 260px;
+  border-radius: 10px;
+  border: 1px solid var(--trait);
+}
+@media (max-width: 699px) {
+  .grille-2 {
+    grid-template-columns: 1fr;
+  }
+  .admin-liste li {
+    flex-wrap: wrap;
+  }
+  .admin__nav {
+    gap: 10px;
+    font-size: 0.875rem;
+  }
+}

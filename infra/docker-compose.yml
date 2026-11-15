@@ -1,0 +1,139 @@
+# Pile de production du portfolio, sur un seul serveur.
+#   Internet → Caddy (HTTPS automatique) → site Next.js, API NestJS, Grafana, Umami
+#   PostgreSQL, Prometheus et les exportateurs restent sur le réseau interne.
+# Lancement : docker compose --env-file .env up -d
+
+name: portfolio
+
+x-journaux: &journaux
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      DOMAINE: ${DOMAINE}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, api]
+    <<: *journaux
+
+  web:
+    image: ghcr.io/${GHCR_OWNER:-codespecter007}/portfolio-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+      UMAMI_SCRIPT_URL: https://stats.${DOMAINE}/script.js
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+    depends_on:
+      api: { condition: service_healthy }
+    <<: *journaux
+
+  api:
+    image: ghcr.io/${GHCR_OWNER:-codespecter007}/portfolio-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://portfolio:${POSTGRES_PASSWORD}@db:5432/portfolio
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      WEB_REVALIDATE_URL: http://web:3000/interne/revalidate
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db: { condition: service_healthy }
+    <<: *journaux
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: portfolio
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portfolio"]
+      interval: 10s
+      retries: 10
+    <<: *journaux
+
+  # Statistiques de visite respectueuses de la vie privée (sans cookie).
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://portfolio:${POSTGRES_PASSWORD}@db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET}
+    depends_on:
+      db: { condition: service_healthy }
+    <<: *journaux
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    <<: *journaux
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SERVER_ROOT_URL: https://grafana.${DOMAINE}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on: [prometheus]
+    <<: *journaux
+
+  # Métriques de la machine : CPU, mémoire, disque, réseau.
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    restart: unless-stopped
+    command: ["--path.rootfs=/host"]
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    <<: *journaux
+
+  # Métriques par conteneur.
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    restart: unless-stopped
+    privileged: true
+    devices: ["/dev/kmsg"]
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    <<: *journaux
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
+  prometheus_data:
+  grafana_data:
