@@ -18,12 +18,12 @@ Tout tourne dans Docker, et chaque push sur `main` passe par un pipeline de test
 
 ## Organisation du dépôt
 
-| Dossier | Contenu |
-|---|---|
-| `web/` | Site Next.js (pages publiques et espace `/admin`), tests Playwright |
-| `api/` | API NestJS + TypeORM : projets, expériences, connexion admin, envoi d’images, métriques |
-| `infra/` | `docker-compose.yml` de production, Caddy, Prometheus, tableaux de bord Grafana |
-| `.github/workflows/` | Pipeline CI/CD |
+| Dossier              | Contenu                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `web/`               | Site Next.js (pages publiques et espace `/admin`), tests Playwright                     |
+| `api/`               | API NestJS + TypeORM : projets, expériences, connexion admin, envoi d’images, métriques |
+| `infra/`             | `docker-compose.yml` de production, Caddy, Prometheus, tableaux de bord Grafana         |
+| `.github/workflows/` | Pipeline CI/CD                                                                          |
 
 ## Le pipeline (push → tests → publication)
 
@@ -62,17 +62,30 @@ Sans `API_INTERNAL_URL`, le site fonctionne seul avec le contenu de `web/src/con
 - `/admin` : liste des projets (ordre, brouillon ou publié) et des expériences.
 - Création et modification des projets : carte, technologies et logos, visuel (capture envoyée ou
   schéma en arborescence), étude de cas complète, liens.
-- Les modifications apparaissent tout de suite sur le site : l’API prévient Next.js, qui vide son cache.
+- Les modifications apparaissent tout de suite sur le site : le cache de Next.js est vidé à chaque
+  enregistrement.
 - Un seul compte, défini par `ADMIN_EMAIL` et `ADMIN_PASSWORD_HASH` ; session dans un cookie httpOnly,
   5 tentatives de connexion par minute au maximum.
 
 ## Mise en production
 
 **Hébergement actuel : Vercel (gratuit).** Le site du dossier `web/` est publié à chaque push sur
-`main`, avec HTTPS et un nom de domaine. Sans API configurée, il utilise le contenu de
-`web/src/content/` et l’espace `/admin` est désactivé.
+`main`, avec HTTPS et le domaine odysseekom.fr. Réglages du projet : _Root Directory_ `web`,
+framework Next.js.
 
-Réglages du projet Vercel : *Root Directory* `web`, framework Next.js, aucune variable à définir.
+Sur Vercel, l’espace admin tourne dans Next.js lui-même (routes `web/src/app/api/`), sans serveur à part :
+
+| Variable                | Origine                                                      |
+| ----------------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`          | Ajoutée par l’intégration **Neon** (Storage → Neon Postgres) |
+| `BLOB_READ_WRITE_TOKEN` | Ajoutée par **Vercel Blob** (Storage → Blob, accès public)   |
+| `ADMIN_EMAIL`           | L’adresse de connexion à l’admin                             |
+| `ADMIN_PASSWORD_HASH`   | `cd web && npm run hash-password -- "mot de passe"`          |
+| `JWT_SECRET`            | 64 caractères aléatoires : `openssl rand -hex 32`            |
+
+Au premier accès, les tables sont créées et remplies avec le contenu de `web/src/content/`.
+Ensuite, la base fait foi : modifier ces fichiers ne change plus le site.
+Sans `DATABASE_URL`, le site utilise `web/src/content/` et `/admin` répond 404.
 
 **Plus tard : auto-hébergement complet** (API, admin, Grafana) avec Docker sur un serveur :
 voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md), puis définir la variable de dépôt

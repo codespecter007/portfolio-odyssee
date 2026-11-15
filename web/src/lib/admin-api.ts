@@ -10,7 +10,9 @@ export class ErreurApi extends Error {
 
 export async function api<T>(chemin: string, init: RequestInit = {}): Promise<T> {
   const estFormData = init.body instanceof FormData;
-  const r = await fetch(`/api${chemin}`, {
+  // Le site utilise trailingSlash : on ajoute la barre finale pour éviter une redirection.
+  const url = `/api${chemin}`.replace(/\/?(\?|$)/, "/$1");
+  const r = await fetch(url, {
     ...init,
     credentials: "same-origin",
     headers: estFormData ? init.headers : { "content-type": "application/json", ...init.headers },
@@ -26,7 +28,7 @@ export async function api<T>(chemin: string, init: RequestInit = {}): Promise<T>
 
 export const json = (data: unknown) => JSON.stringify(data);
 
-/** Envoie une image et renvoie son adresse publique (/uploads/…). */
+/** Envoie une image et renvoie son adresse publique. */
 export async function envoyerImage(fichier: File): Promise<string> {
   const fd = new FormData();
   fd.append("fichier", fichier);

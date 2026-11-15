@@ -92,7 +92,10 @@ export const QrVide = (p: P) => (
 
 /** Logo officiel d’une technologie (Simple Icons). */
 export function Logo({ nom, taille = 16 }: { nom: LogoName; taille?: number }) {
-  const { path, color } = logos[nom];
+  // Un logo inconnu (saisi depuis l’admin) ne doit pas casser la page.
+  const logo = logos[nom] as (typeof logos)[LogoName] | undefined;
+  if (!logo) return null;
+  const { path, color } = logo;
   return (
     <svg width={taille} height={taille} viewBox="0 0 24 24" aria-hidden focusable={false}>
       <path d={path} fill={color} />

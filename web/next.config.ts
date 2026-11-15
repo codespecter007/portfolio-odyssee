@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 /**
- * Le site tourne comme un serveur Node (image Docker « standalone »).
- * En production, Caddy envoie /api et /uploads à l’API NestJS.
+ * Sur Vercel, l’espace admin et ses routes /api sont servis par Next (base Neon, images Vercel Blob).
+ * En auto-hébergement Docker (« standalone »), Caddy envoie /api et /uploads à l’API NestJS.
  * En développement, ces chemins sont redirigés ici vers l’API locale.
  */
 const API = process.env.API_INTERNAL_URL;
@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   poweredByHeader: false,
   async rewrites() {
-    if (!API || process.env.NODE_ENV === "production") return [];
+    // Avec une base (Vercel), les routes /api sont servies par Next lui-même.
+    if (!API || process.env.DATABASE_URL || process.env.NODE_ENV === "production") return [];
     return [
       { source: "/api/:chemin*", destination: `${API}/api/:chemin*` },
       { source: "/uploads/:chemin*", destination: `${API}/uploads/:chemin*` },
