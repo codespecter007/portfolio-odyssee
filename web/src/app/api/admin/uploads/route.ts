@@ -9,7 +9,8 @@ const TYPES = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" } as con
 
 /** Envoi des captures d’écran depuis l’espace admin, stockées sur Vercel Blob. */
 export const POST = route(async (req) => {
-  if (!process.env.BLOB_READ_WRITE_TOKEN)
+  // Vercel Blob s’authentifie avec BLOB_STORE_ID (récent) ou BLOB_READ_WRITE_TOKEN (ancien).
+  if (!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN)
     throw new ErreurHttp(503, "Stockage d’images non configuré (Vercel Blob)");
   const fd = await req.formData().catch(() => null);
   const fichier = fd?.get("fichier");

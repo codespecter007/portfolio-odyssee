@@ -7,7 +7,17 @@ import { projets as projetsLocaux } from "@/content/projets";
  * Les tables sont créées au premier accès, puis remplies avec le contenu de src/content/
  * si elles sont vides : on ne réécrase jamais le travail fait dans l’admin.
  */
-export const URL_BASE = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+function trouverUrl(): string | undefined {
+  const env = process.env;
+  if (env.DATABASE_URL) return env.DATABASE_URL;
+  if (env.POSTGRES_URL) return env.POSTGRES_URL;
+  // L’intégration Neon peut ajouter un préfixe (ex. DATABASE_DATABASE_URL, STORAGE_POSTGRES_URL).
+  const cle = Object.keys(env)
+    .filter((k) => /(^|_)(DATABASE_URL|POSTGRES_URL)$/.test(k) && env[k]?.startsWith("postgres"))
+    .sort((a, b) => a.length - b.length)[0];
+  return cle ? env[cle] : undefined;
+}
+export const URL_BASE = trouverUrl();
 export const baseActive = Boolean(URL_BASE);
 
 const g = globalThis as unknown as { __pool?: Pool; __pret?: Promise<void> };

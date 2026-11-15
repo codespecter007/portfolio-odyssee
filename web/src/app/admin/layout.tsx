@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import "./admin.css";
+import { baseActive } from "@/lib/serveur/db";
 import { BoutonDeconnexion } from "@/components/admin/BoutonDeconnexion";
 import { BasculeTheme } from "@/components/BasculeTheme";
 
@@ -15,8 +16,7 @@ export const metadata: Metadata = {
 
 export default function LayoutAdmin({ children }: Readonly<{ children: React.ReactNode }>) {
   // Sans base (DATABASE_URL) ni API (API_INTERNAL_URL), l’espace admin n’existe pas.
-  if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && !process.env.API_INTERNAL_URL)
-    notFound();
+  if (!baseActive && !process.env.API_INTERNAL_URL) notFound();
   return (
     <div className="admin">
       <header className="admin__barre">
