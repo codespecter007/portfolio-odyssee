@@ -22,7 +22,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const projet = await getProjet(slug);
-  return projet ? { title: projet.nom, description: projet.description } : {};
+  if (!projet) return {};
+  return {
+    title: projet.nom,
+    description: projet.description,
+    alternates: { canonical: `/projets/${projet.slug}/` },
+    openGraph: {
+      title: projet.nom,
+      description: projet.description,
+      url: `/projets/${projet.slug}/`,
+      images: [{ url: "/og.jpg", width: 1200, height: 630 }],
+    },
+  };
 }
 
 export default async function EtudeDeCas({ params }: { params: Promise<{ slug: string }> }) {

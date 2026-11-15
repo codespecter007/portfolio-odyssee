@@ -8,6 +8,7 @@ import { CopierEmail } from "./CopierEmail";
 import { FormulaireContact } from "./FormulaireContact";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact/" },
   title: "Contact",
   description: "Pour un stage, une question sur un projet ou un échange.",
 };

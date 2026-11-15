@@ -7,6 +7,7 @@ import { chapitres, competences } from "@/content/parcours";
 import { getExperiences, getProjets } from "@/lib/donnees";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/parcours/" },
   title: "Parcours et compétences",
   description: "De la maternelle à l’école d’ingénieurs, et les compétences qui en découlent.",
 };

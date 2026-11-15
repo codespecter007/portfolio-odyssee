@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Bouton } from "@/components/Bouton";
 import { CarteProjet } from "@/components/CarteProjet";
 import { Fleche, Logo, Mail, Telecharger } from "@/components/icones";
@@ -32,12 +33,41 @@ const tuiles = [
   { numero: "03", titre: "Relier", texte: "Des réseaux configurés à la main : VLAN, OSPF, HSRP." },
 ];
 
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
+/** Données structurées : aident Google à reconnaître la personne derrière le site. */
+const personne = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profil.nom,
+  url: profil.site,
+  image: `${profil.site}/og.jpg`,
+  jobTitle: "Élève-ingénieur en informatique",
+  description: profil.presentation,
+  alumniOf: { "@type": "CollegeOrUniversity", name: "3iL, école d’ingénieurs en informatique" },
+  address: { "@type": "PostalAddress", addressLocality: "Limoges", addressCountry: "FR" },
+  sameAs: [profil.liens.github, profil.liens.linkedin].filter(Boolean),
+  knowsAbout: [
+    "Développement full-stack",
+    "DevOps",
+    "Java",
+    "Spring Boot",
+    "React",
+    "Docker",
+    "Kubernetes",
+  ],
+};
+
 export default async function Accueil() {
   const [mellifica, reseau] = await getProjets();
   const altPhoto = `Portrait de ${profil.nom}`;
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personne).replace(/</g, "\\u003c") }}
+      />
       {/* Héros : nom, stage recherché et accès au CV dès le premier écran */}
       <section className="heros">
         <TexteParMots

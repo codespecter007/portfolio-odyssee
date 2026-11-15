@@ -10,6 +10,8 @@ export const profil = {
   nom: "Odyssée KOM FOADEM",
   nomCourt: "Odyssée KOM FOADEM",
   ecole: "3iL",
+  /** Adresse publique du site, utilisée pour le référencement et les aperçus de liens. */
+  site: "https://odysseekom.fr",
 
   presentation:
     "Élève-ingénieur en informatique à 3iL, à Limoges. Je développe des applications full-stack (Java, Spring Boot, React) et je les conteneurise avec Docker et Kubernetes.",
@@ -32,8 +34,8 @@ export const profil = {
     linkedin: "https://www.linkedin.com/in/odyss%C3%A9e-foadem-178437377/" as string | null,
   },
 
-  // À REMPLACER : image du QR code (vers l’adresse finale du site), dans /public/.
-  qrCode: null as string | null,
+  // QR code vers https://odysseekom.fr/?ref=qr (les visites venues du CV sont comptées à part).
+  qrCode: "/qr-portfolio.svg" as string | null,
 };
 
 /** Lien utilisable dans un `href`, même si la vraie adresse n’est pas encore connue. */

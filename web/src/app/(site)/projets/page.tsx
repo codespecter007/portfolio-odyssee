@@ -5,8 +5,10 @@ import { getProjets } from "@/lib/donnees";
 import { Galerie } from "./Galerie";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/projets/" },
   title: "Projets",
-  description: "Mes projets : sites web, réseaux, et la suite.",
+  description:
+    "Mes projets en développement full-stack, DevOps, IA et réseaux : contexte, mon rôle, choix techniques et résultats.",
 };
 
 export default async function PageProjets() {
