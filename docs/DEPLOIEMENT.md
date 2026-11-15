@@ -1,38 +1,41 @@
 # Mettre le portfolio en ligne
 
-Ce guide part de zéro : un serveur gratuit chez Oracle Cloud, un domaine offert par le
+Ce guide part de zéro : un serveur Azure (offre étudiante), un domaine offert par le
 GitHub Student Developer Pack, puis le branchement du pipeline. Compter environ une heure.
 
-## 1. Le serveur Oracle Cloud (Always Free)
+## 1. Le serveur (Azure for Students)
 
-1. Sur cloud.oracle.com : **Compute → Instances → Create instance**.
-2. Image : **Ubuntu 24.04**. Forme : **VM.Standard.A1.Flex** (Ampere, ARM), 2 OCPU et 12 Go de RAM.
-   Ça reste dans l’offre gratuite.
-3. **Add SSH keys** : colle ta clé publique (`ssh-keygen -t ed25519` sur ton PC si tu n’en as pas,
-   puis le contenu de `~/.ssh/id_ed25519.pub`).
-4. Note l’**adresse IP publique** de l’instance.
-5. Ouvrir les ports web : **Networking → Virtual cloud networks → ton VCN → Security Lists →
-   Default Security List → Add Ingress Rules** :
-   - source `0.0.0.0/0`, TCP, port de destination `80`
-   - source `0.0.0.0/0`, TCP, port de destination `443`
-   - source `0.0.0.0/0`, UDP, port de destination `443`
+1. Active l’offre sur azure.microsoft.com/free/students avec ton e-mail 3iL : 100 $ de crédit,
+   sans carte bancaire.
+2. Dans le portail Azure : **Machines virtuelles → Créer → Machine virtuelle Azure**.
+   - Groupe de ressources : nouveau, `portfolio`
+   - Nom : `portfolio`, région : **France Central**
+   - Image : **Ubuntu Server 24.04 LTS, x64**
+   - Taille : **B2s** (2 vCPU, 4 Go), confortable pour toute la pile ;
+     **B1ms** (1 vCPU, 2 Go) si tu veux faire durer le crédit, avec la mémoire d’échange ci-dessous
+   - Authentification : **clé publique SSH**, utilisateur `azureuser`, source :
+     *Utiliser une clé publique existante*, puis coller ta clé publique
+   - Ports entrants publics : **SSH (22), HTTP (80), HTTPS (443)**
+3. **Vérifier + créer**, puis note l’**adresse IP publique** sur la page de la machine.
+4. Pour que l’IP ne change jamais : **Adresse IP publique → Configuration → Statique**.
 
-Connecte-toi puis prépare la machine :
+Connecte-toi puis installe Docker :
 
 ```bash
-ssh ubuntu@<IP>
-
-# Les images Ubuntu d’Oracle bloquent aussi les ports dans iptables : on les ouvre.
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p udp --dport 443 -j ACCEPT
-sudo netfilter-persistent save
-
-# Docker
+ssh azureuser@<IP>
 curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker ubuntu
+sudo usermod -aG docker azureuser
+
+# Mémoire d’échange de 2 Go (utile surtout sur une petite machine)
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
 exit            # puis se reconnecter pour que le groupe docker soit pris en compte
 ```
+
+Les images Docker sont construites pour amd64 et arm64 : le même pipeline fonctionne
+chez Azure, Oracle, DigitalOcean ou Hetzner.
 
 ## 2. Le nom de domaine
 
@@ -53,7 +56,7 @@ La propagation prend de quelques minutes à une heure. Vérifier : `ping komfoad
 ## 3. Les secrets du serveur
 
 ```bash
-ssh ubuntu@<IP>
+ssh azureuser@<IP>
 mkdir -p ~/portfolio/infra && cd ~/portfolio/infra
 nano .env
 ```
@@ -75,14 +78,14 @@ Sur ton PC, crée une clé réservée au déploiement et autorise-la sur le serv
 
 ```bash
 ssh-keygen -t ed25519 -f deploy_portfolio -N ""
-ssh-copy-id -i deploy_portfolio.pub ubuntu@<IP>
+ssh-copy-id -i deploy_portfolio.pub azureuser@<IP>
 ```
 
 Dans le dépôt GitHub, **Settings → Secrets and variables → Actions** :
 
 - onglet **Secrets** :
   - `SSH_HOST` : l’IP du serveur
-  - `SSH_USER` : `ubuntu`
+  - `SSH_USER` : `azureuser`
   - `SSH_KEY` : le contenu du fichier `deploy_portfolio` (la clé **privée**)
 - onglet **Variables** :
   - `DOMAINE` : ton domaine, par exemple `komfoadem.me`

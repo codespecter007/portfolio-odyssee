@@ -68,4 +68,4 @@ Sans `API_INTERNAL_URL`, le site fonctionne seul avec le contenu de `web/src/con
 
 ## Mise en production
 
-Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : serveur Oracle Cloud, nom de domaine, secrets GitHub.
+Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) : serveur Azure, nom de domaine, secrets GitHub.
